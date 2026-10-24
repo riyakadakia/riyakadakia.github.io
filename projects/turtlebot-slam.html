@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mobile Robot State Estimation, Mapping &amp; Localization - Riya Kadakia</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="masthead">
+    <nav>
+      <a class="site-title" href="../index.html">Riya Kadakia</a>
+      <a href="../index.html">Home</a>
+      <a href="../cv.html">Curriculum Vitae</a>
+      <a href="../projects.html" class="active">Projects</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../classes.html">Classes</a>
+    </nav>
+  </header>
+
+  <div class="page">
+    <aside class="sidebar">
+      <img class="avatar" src="../images/headshot.jpg" alt="Riya Kadakia" onerror="this.src='../images/placeholder.svg'">
+      <h3 class="name">Riya Kadakia</h3>
+      <p class="bio">Robotics &amp; Information Systems student at Carnegie Mellon.</p>
+      <ul>
+        <li>Pittsburgh, PA</li>
+        <li>Carnegie Mellon University</li>
+        <li><a href="mailto:rkadakia@andrew.cmu.edu">Email</a></li>
+        <li><a href="https://github.com/riyakadakia">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/riyakadakia">LinkedIn</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <p><a href="../projects.html">&larr; All projects</a></p>
+      <h1>Mobile Robot State Estimation, Mapping &amp; Localization</h1>
+      <p class="tags">TurtleBot3 &middot; ROS 2 &middot; C++ &middot; Python &middot; Fall 2026</p>
+      <img class="project-hero" src="../images/placeholder.svg" alt="Mobile Robot State Estimation, Mapping &amp; Localization">
+      <h2>Overview</h2>
+      <p>Sensor fusion, ICP, occupancy grids and Monte Carlo localization on a TurtleBot3.</p>
+      <h2>What I did</h2>
+      <ul>
+        <li>Fused gyro and wheel-encoder yaw with a complementary filter; tuned &alpha; over 20 trials, cutting heading error from 6.2&deg; to 2.9&deg;.</li><li>Implemented point-to-point (SVD) and point-to-plane (KD-tree, normals) ICP to align LiDAR scans and reduce odometry drift.</li><li>Built a log-odds occupancy-grid mapper and re-localized from a random pose with MCL in Nav2 and RViz.</li><li>Debugged distributed ROS 2 issues including chrony clock sync for TF lookups and DDS discovery configuration.</li>
+      </ul>
+      <p class="todo">TODO: add photos, videos, a longer write-up, and links (code, paper, demo).</p>
+    </main>
+  </div>
+
+  <footer>&copy; 2026 Riya Kadakia</footer>
+</body>
+</html>
