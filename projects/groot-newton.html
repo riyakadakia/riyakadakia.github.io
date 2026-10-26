@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GR00T N1.6 VLA in Newton - Riya Kadakia</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="masthead">
+    <nav>
+      <a class="site-title" href="../index.html">Riya Kadakia</a>
+      <a href="../index.html">Home</a>
+      <a href="../cv.html">Curriculum Vitae</a>
+      <a href="../projects.html" class="active">Projects</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../classes.html">Classes</a>
+    </nav>
+  </header>
+
+  <div class="page">
+    <aside class="sidebar">
+      <img class="avatar" src="../images/headshot.jpg" alt="Riya Kadakia" onerror="this.src='../images/placeholder.svg'">
+      <h3 class="name">Riya Kadakia</h3>
+      <p class="bio">Robotics &amp; Information Systems student at Carnegie Mellon.</p>
+      <ul>
+        <li>Pittsburgh, PA</li>
+        <li>Carnegie Mellon University</li>
+        <li><a href="mailto:rkadakia@andrew.cmu.edu">Email</a></li>
+        <li><a href="https://github.com/riyakadakia">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/riyakadakia">LinkedIn</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <p><a href="../projects.html">&larr; All projects</a></p>
+      <h1>GR00T N1.6 VLA in Newton</h1>
+<p class="tags">Momentum Robotics Lab, CMU &middot; Research Assistant &middot; Mar &ndash; Apr 2026 &middot; Isaac GR00T N1.6 &middot; Newton &middot; Python &middot; CUDA</p>
+      <figure>
+        <img src="../images/mrl/groot-newton.jpg" alt="Franka arm in Newton reaching toward a pen, driven by GR00T N1.6.">
+        <figcaption>Franka arm in Newton reaching toward a pen, driven by GR00T N1.6.</figcaption>
+      </figure>
+      <h2>Overview</h2>
+      <p>Vision-language-action (VLA) models take a camera image and a language instruction and output robot actions.
+        I integrated NVIDIA's <a href="https://github.com/NVIDIA/Isaac-GR00T">Isaac GR00T N1.6</a> into the
+        <a href="https://newton-physics.github.io/newton/">Newton</a> physics simulator so a simulated Franka arm can be
+        controlled by language prompts, as a testbed for VLA-driven manipulation of articulated objects.</p>
+
+      <h2>How it works</h2>
+      <ul>
+        <li><strong>Policy server:</strong> GR00T runs as a server on the GPU (in a tmux session). I started with the
+          ROBOCASA_PANDA_OMRON embodiment, realized it targets a mobile robot, and switched to DROID, which is tabletop manipulation.</li>
+        <li><strong>Simulation client:</strong> built from Newton's Franka example. It connects a GR00T PolicyClient at startup and
+          replaces the IK-driven <code>set_joint_targets()</code> with a new <code>set_joint_targets_groot()</code> that
+          applies the model's actions each step.</li>
+        <li><strong>Vision:</strong> added a tiled camera sensor to feed rendered images back into the VLA, and experimented with camera
+          placements to match what the policy expects.</li>
+      </ul>
+      <div class="fig-row">
+      <figure>
+        <img src="../images/mrl/groot-arch.jpg" alt="Control loop: the simulator sends camera images, joint state and a language prompt to the GR00T policy server, which returns a chunk of actions to execute.">
+        <figcaption>Control loop: the simulator sends camera images, joint state and a language prompt to the GR00T policy server, which returns a chunk of actions to execute.</figcaption>
+      </figure>
+      </div>
+      <h2>Debugging</h2>
+      <ul>
+        <li>The VLA outputs <em>end-effector</em> positions, not joint angles as I first assumed, so the action mapping had to change.</li>
+        <li>The robot folded in on itself because joint values were being written to the wrong joints; fixed by checking joint labels.</li>
+        <li>Got observations into the right format by printing raw data and reading how GR00T's own code processes it.</li>
+        <li>Moved visualization from Viser to Newton's viewer, fixed a camera alignment problem (one image needed flipping),
+          and fixed a loop that only called GR00T once.</li>
+      </ul>
+
+      <h2>Current status</h2>
+      <p>The full loop runs end to end. The current issue is that the arm drifts consistently to the right regardless of
+        which axis is tested, which I'm tracking down next.</p>
+    </main>
+  </div>
+
+  <footer>&copy; 2026 Riya Kadakia</footer>
+</body>
+</html>

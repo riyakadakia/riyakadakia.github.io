@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Force Sensing &amp; Dynamic Manipulation - Riya Kadakia</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="masthead">
+    <nav>
+      <a class="site-title" href="../index.html">Riya Kadakia</a>
+      <a href="../index.html">Home</a>
+      <a href="../cv.html">Curriculum Vitae</a>
+      <a href="../projects.html" class="active">Projects</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../classes.html">Classes</a>
+    </nav>
+  </header>
+
+  <div class="page">
+    <aside class="sidebar">
+      <img class="avatar" src="../images/headshot.jpg" alt="Riya Kadakia" onerror="this.src='../images/placeholder.svg'">
+      <h3 class="name">Riya Kadakia</h3>
+      <p class="bio">Robotics &amp; Information Systems student at Carnegie Mellon.</p>
+      <ul>
+        <li>Pittsburgh, PA</li>
+        <li>Carnegie Mellon University</li>
+        <li><a href="mailto:rkadakia@andrew.cmu.edu">Email</a></li>
+        <li><a href="https://github.com/riyakadakia">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/riyakadakia">LinkedIn</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <p><a href="../projects.html">&larr; All projects</a></p>
+      <h1>Force Sensing &amp; Dynamic Manipulation</h1>
+<p class="tags">Momentum Robotics Lab, CMU &middot; Research Assistant &middot; Mar &ndash; Apr 2026 &middot; Newton &middot; Franka FR3 &middot; xArm7 &middot; Inverse Kinematics</p>
+      <figure>
+        <img src="../images/mrl/force-box.jpg" alt="Left- and right-finger contact forces while the gripper holds and rotates a box.">
+        <figcaption>Left- and right-finger contact forces while the gripper holds and rotates a box.</figcaption>
+      </figure>
+      <h2>Overview</h2>
+      <p>A set of simulation experiments in Newton on how a robot hand makes and keeps contact with objects, building up from
+        a simple scripted pickup to measuring per-finger forces and throwing.</p>
+
+      <h2>Box pickup with inverse kinematics</h2>
+      <ul>
+        <li>Scripted a Franka arm to pick up a box by solving IK for waypoints placed relative to the box and interpolating
+          between four states: start &rarr; above the box with gripper open &rarr; gripper closed &rarr; lifted.</li>
+        <li>The gripper fingers aren't part of the IK chain, so they're driven by a separate open/closed state (0.04 m / 0.0 m per finger).</li>
+        <li>Visualized the result in both Blender and Viser, and debugged contact forces between the robot and box.</li>
+      </ul>
+      <div class="fig-row">
+      <figure>
+        <img src="../images/mrl/box-pickup.jpg" alt="Box pickup in Newton, visualized in Blender.">
+        <figcaption>Box pickup in Newton, visualized in Blender.</figcaption>
+      </figure>
+      </div>
+      <h2>Per-finger force sensing</h2>
+      <ul>
+        <li>Picked up four objects (a box, a pen, the Stanford bunny and a cylinder), then rotated and wiggled them while
+          recording contact force on each finger separately.</li>
+        <li>Rotations ranged from &plusmn;&pi;/4 for the box to &plusmn;&pi;/8 for the smaller objects.</li>
+      </ul>
+
+      <h2>xArm7 throwing</h2>
+      <ul>
+        <li>Brought the xArm7 into Newton and mapped its 7 revolute arm joints and 6 gripper joints.</li>
+        <li>Built a forward throwing motion using only 3&ndash;4 of the joints, with rotation fixed so motion stays in the XZ plane,
+          and checked whether the gripper was actually contacting the box.</li>
+        <li>Next: throw objects with different URDFs, and compute the initial velocity and rotational inertia needed to pass
+          through chosen middle and end points.</li>
+      </ul>
+      <div class="fig-row">
+      <figure>
+        <img src="../images/mrl/xarm-throw.jpg" alt="xArm7 throwing a box in Newton.">
+        <figcaption>xArm7 throwing a box in Newton.</figcaption>
+      </figure>
+      </div>
+      <p><a href="https://github.com/riyakadakia/newton_projects">Code on GitHub</a></p>
+    </main>
+  </div>
+
+  <footer>&copy; 2026 Riya Kadakia</footer>
+</body>
+</html>

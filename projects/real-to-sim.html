@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Real-to-Sim with Gaussian Splats &amp; Viser - Riya Kadakia</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="masthead">
+    <nav>
+      <a class="site-title" href="../index.html">Riya Kadakia</a>
+      <a href="../index.html">Home</a>
+      <a href="../cv.html">Curriculum Vitae</a>
+      <a href="../projects.html" class="active">Projects</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../classes.html">Classes</a>
+    </nav>
+  </header>
+
+  <div class="page">
+    <aside class="sidebar">
+      <img class="avatar" src="../images/headshot.jpg" alt="Riya Kadakia" onerror="this.src='../images/placeholder.svg'">
+      <h3 class="name">Riya Kadakia</h3>
+      <p class="bio">Robotics &amp; Information Systems student at Carnegie Mellon.</p>
+      <ul>
+        <li>Pittsburgh, PA</li>
+        <li>Carnegie Mellon University</li>
+        <li><a href="mailto:rkadakia@andrew.cmu.edu">Email</a></li>
+        <li><a href="https://github.com/riyakadakia">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/riyakadakia">LinkedIn</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <p><a href="../projects.html">&larr; All projects</a></p>
+      <h1>Real-to-Sim with Gaussian Splats &amp; Viser</h1>
+<p class="tags">Momentum Robotics Lab, CMU &middot; Research Assistant &middot; Feb &ndash; Mar 2026 &middot; Gaussian Splatting &middot; Nerfstudio &middot; COLMAP &middot; Viser &middot; Newton &middot; Blender</p>
+      <figure>
+        <img src="../images/mrl/plant-splat.jpg" alt="A plant captured on an iPhone, reconstructed as a Gaussian splat and explored in 360&deg; in Viser.">
+        <figcaption>A plant captured on an iPhone, reconstructed as a Gaussian splat and explored in 360&deg; in Viser.</figcaption>
+      </figure>
+      <h2>Overview</h2>
+      <p>My first weeks in the lab, getting up to speed on the simulation and 3D-reconstruction tools the rest of my
+        projects build on: capturing real objects as Gaussian splats, visualizing robots and scenes in Viser, and
+        simulating cloth in Newton.</p>
+
+      <h2>iPhone video &rarr; Gaussian splat &rarr; Viser</h2>
+      <p>A pipeline to capture a real object with a phone and view it in 3D: extract frames and run COLMAP
+        (<code>ns-process-data</code>), train a splat with Nerfstudio's <code>splatfacto</code> (up to an hour),
+        export it, and load it into a Viser viewer.</p>
+      <ul>
+        <li><strong>Choosing the right object:</strong> an AirPods case on a white table only matched 2 of 317 frames (0.63%) in COLMAP.
+          A plant, with much more texture, matched 331 of 331.</li>
+        <li><strong>No sudo on the server:</strong> installed COLMAP through Miniconda in my home folder.</li>
+        <li><strong>Wrong pip:</strong> conda's pip was shadowing the venv's, breaking the gsplat build; fixed by calling the venv's Python directly.</li>
+        <li><strong>Blank viewer:</strong> plain SSH port forwarding kept dropping the WebSocket; VS Code Remote SSH port forwarding fixed it.</li>
+        <li>Shared live views through Viser's share link or ngrok.</li>
+      </ul>
+
+      <h2>What is a Gaussian splat?</h2>
+      <p>Like a NeRF, it's a radiance-field representation of a scene, but instead of a neural network it uses many soft 3D
+        ellipsoids, each with a position, size, orientation, color and transparency. Training starts from a
+        structure-from-motion point cloud and optimizes the Gaussians by projecting them onto 2D images and comparing with
+        the real photos, the reverse direction from a NeRF.</p>
+
+      <h2>Robots and cloth in simulation</h2>
+      <ul>
+        <li><strong>Bimanual xArm7 in Viser:</strong> adapted Viser's URDF visualizer to show two arms with per-joint sliders.</li>
+        <li><strong>Cloth fling in Newton:</strong> the cloth didn't gain enough momentum to fling forward until I shortened the
+          action period significantly. That huge acceleration then left the corners racing ahead of the rest of the cloth,
+          which I fixed by increasing tension between nodes and switching from Blender to Viser for a better cloth rendering.</li>
+      </ul>
+      <div class="fig-row">
+      <figure>
+        <img src="../images/mrl/bimanual-viser.jpg" alt="Bimanual xArm7 URDF in Viser with joint controls.">
+        <figcaption>Bimanual xArm7 URDF in Viser with joint controls.</figcaption>
+      </figure>
+      </div>
+    </main>
+  </div>
+
+  <footer>&copy; 2026 Riya Kadakia</footer>
+</body>
+</html>

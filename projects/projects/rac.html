@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RaC: Recovery &amp; Correction for Robot Learning - Riya Kadakia</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="masthead">
+    <nav>
+      <a class="site-title" href="../index.html">Riya Kadakia</a>
+      <a href="../index.html">Home</a>
+      <a href="../cv.html">Curriculum Vitae</a>
+      <a href="../projects.html" class="active">Projects</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../classes.html">Classes</a>
+    </nav>
+  </header>
+
+  <div class="page">
+    <aside class="sidebar">
+      <img class="avatar" src="../images/headshot.jpg" alt="Riya Kadakia" onerror="this.src='../images/placeholder.svg'">
+      <h3 class="name">Riya Kadakia</h3>
+      <p class="bio">Robotics &amp; Information Systems student at Carnegie Mellon.</p>
+      <ul>
+        <li>Pittsburgh, PA</li>
+        <li>Carnegie Mellon University</li>
+        <li><a href="mailto:rkadakia@andrew.cmu.edu">Email</a></li>
+        <li><a href="https://github.com/riyakadakia">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/riyakadakia">LinkedIn</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <p><a href="../projects.html">&larr; All projects</a></p>
+      <h1>RaC: Recovery &amp; Correction for Robot Learning</h1>
+      <p class="tags">Robotic Caregiving &amp; Human Interaction Lab, CMU &middot; Research Assistant &middot; Mar &ndash; Aug 2025
+        &middot; Bimanual xArm7 &middot; VR Teleoperation &middot; Imitation Learning</p>
+      <p><strong>Paper:</strong> Zheyuan Hu, Robyn Wu, Naveen Enock, Jasmine Li, <strong>Riya Kadakia</strong>, Zackory Erickson, Aviral Kumar.
+        <em>RaC: Robot Learning for Long-Horizon Tasks by Scaling Recovery and Correction.</em>
+        Accepted to IEEE Transactions on Robotics (T-RO).<br>
+        <a href="https://arxiv.org/abs/2509.07953">arXiv</a> &middot;
+        <a href="https://arxiv.org/pdf/2509.07953">PDF</a> &middot;
+        <a href="https://rac-scaling-robot.github.io/">Project page &amp; videos</a></p>
+      <!-- To add a figure: save it to images/rac/ and uncomment
+      <figure><img src="../images/rac/overview.png" alt="RaC overview"><figcaption>...</figcaption></figure> -->
+
+      <h2>Overview</h2>
+      <p>Robot policies trained by imitating human demonstrations tend to plateau well short of reliable on long-horizon,
+        contact-rich tasks with deformable objects. Small errors compound, and collecting more &ldquo;perfect&rdquo;
+        demonstrations has diminishing returns: even with over 5,000 demonstrations, prior state-of-the-art models hang a
+        shirt successfully only about 75% of the time.</p>
+      <p>The issue is what's missing from the data. Clean demonstrations rarely show a robot getting out of trouble: in a
+        sample of the large DROID dataset, only 3.68% of episodes contain any recovery behavior. <strong>RaC</strong> adds a
+        training phase after imitation pre-training that deliberately collects those behaviors.</p>
+
+      <h2>Method</h2>
+      <p>The policy runs on its own, and when a human operator sees failure coming they take over and do two things:</p>
+      <ul>
+        <li><strong>Recover:</strong> rewind the robot back to a familiar, in-distribution state.</li>
+        <li><strong>Correct:</strong> complete the current sub-task from there.</li>
+      </ul>
+      <p>Two rules shape the data: every intervention pairs a recovery with a correction, and the episode ends right after the
+        intervention so that later sub-tasks aren't recorded under a mix of human and policy behavior. The training objective
+        stays the same as standard imitation learning; the gains come entirely from what the data contains.</p>
+
+      <h2>System</h2>
+      <ul>
+        <li><strong>Robot:</strong> two 7-DoF xArm7 arms with soft grippers, one overhead camera and two wrist cameras, streaming data at 60&nbsp;Hz.</li>
+        <li><strong>VR shared autonomy:</strong> Oculus Quest controllers with a &ldquo;clutch&rdquo; button. Holding it hands control to the
+          operator, releasing it hands control back to the policy. Motions are measured relative to where the controller started,
+          so the operator never has to line their hand up with the gripper.</li>
+        <li><strong>Recovery guidance:</strong> SAM2 tracks the grippers in the overhead camera across the original demonstrations
+          to render a heatmap of where the grippers usually are, showing operators where to recover to.</li>
+        <li><strong>Policy:</strong> a 300M-parameter multimodal diffusion transformer trained with flow matching, predicting one second
+          of actions at a time and replanning every 0.5&nbsp;s.</li>
+      </ul>
+
+      <h2>Tasks</h2>
+      <ul>
+        <li><strong>Shirt hanging (5 steps):</strong> lift a hanger off the rack, hand it to the other gripper, insert it into the right
+          collar, then the left collar, and hang the shirt on the rack.</li>
+        <li><strong>Airtight container lid sealing (5 steps):</strong> grasp a lid from a dish rack, reorient and place it, snap two
+          opposing tabs, rotate the bowl, snap the last two tabs.</li>
+        <li><strong>Takeout box packing (7 steps):</strong> place a clamshell box, pick up a spatula, scoop a burger, put it in the
+          box, nudge it into place, close the lid and tuck in the locking tab.</li>
+        <li><strong>Bimanual assembly (simulation, 3 steps):</strong> block into socket, socket onto block, workpiece onto platform.</li>
+      </ul>
+
+      <h2>Results</h2>
+      <ul>
+        <li><strong>Shirt hanging: 78.3% success with 5 hours of data</strong>, compared with 75.0% for ALOHA Unleashed using ~89 hours
+          (5,345 demos) and ~63.6% for Seed GR-3 using ~116 hours.</li>
+        <li><strong>Simulated assembly:</strong> 61/100 successes, compared with 22/100 for HG-DAgger and 23/100 for full demonstrations.</li>
+        <li>Up to <strong>10&times; more data-efficient</strong> than prior work, with steeper scaling than collecting full demonstrations
+          or correction-only interventions (HG-DAgger) across all tasks.</li>
+        <li><strong>Test-time scaling:</strong> the more recovery maneuvers a policy performs during a rollout, the more likely it is to
+          succeed. Success rises roughly linearly with recoveries (r&nbsp;=&nbsp;0.71&ndash;0.88 across the real-world tasks).</li>
+      </ul>
+
+      <h2>My role</h2>
+      <ul>
+        <li>Built the VR teleoperation and multi-camera capture system used to collect bimanual, contact-rich, long-horizon demonstrations and interventions.</li>
+      </ul>
+    </main>
+  </div>
+
+  <footer>&copy; 2026 Riya Kadakia</footer>
+</body>
+</html>
