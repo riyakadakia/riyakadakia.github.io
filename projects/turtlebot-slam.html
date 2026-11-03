@@ -35,15 +35,81 @@
     <main>
       <p><a href="../projects.html">&larr; All projects</a></p>
       <h1>Mobile Robot State Estimation, Mapping &amp; Localization</h1>
-      <p class="tags">TurtleBot3 &middot; ROS 2 &middot; C++ &middot; Python &middot; Fall 2026</p>
-      <img class="project-hero" src="../images/placeholder.svg" alt="Mobile Robot State Estimation, Mapping &amp; Localization">
+      <p class="tags">16-280 Intelligent Robot Systems, CMU &middot; Fall 2026 &middot; TurtleBot3 &middot; ROS 2 &middot; Python &middot; C++</p>
+      <figure>
+        <img src="../images/c280/icp_compare.jpg" alt="Map built from odometry alone vs. point-to-plane ICP">
+        <figcaption>The same LiDAR scans merged two ways: with wheel odometry alone (left), walls double up as drift builds;
+          with my point-to-plane ICP (right), the walls and the inner box come out much tighter.</figcaption>
+      </figure>
+
       <h2>Overview</h2>
-      <p>Sensor fusion, ICP, occupancy grids and Monte Carlo localization on a TurtleBot3.</p>
-      <h2>What I did</h2>
+      <p>Over a semester of labs, my group and I built up the core of a mobile robot's navigation stack from scratch on a
+        TurtleBot3 in ROS&nbsp;2: estimating heading, aligning LiDAR scans, building a map, and then localizing the robot in
+        that map from an unknown start. Each piece fed the next, and each was demoed live in a design review with course staff.</p>
+
+      <h2>1. Heading estimation with a complementary filter</h2>
+      <p>The gyroscope is precise in the short term but drifts as small biases integrate; wheel encoders don't drift the same way
+        but break down when wheels slip. Fusing them gives a better yaw estimate than either alone.</p>
       <ul>
-        <li>Fused gyro and wheel-encoder yaw with a complementary filter; tuned &alpha; over 20 trials, cutting heading error from 6.2&deg; to 2.9&deg;.</li><li>Implemented point-to-point (SVD) and point-to-plane (KD-tree, normals) ICP to align LiDAR scans and reduce odometry drift.</li><li>Built a log-odds occupancy-grid mapper and re-localized from a random pose with MCL in Nav2 and RViz.</li><li>Debugged distributed ROS 2 issues including chrony clock sync for TF lookups and DDS discovery configuration.</li>
+        <li>Wrote ROS&nbsp;2 nodes that integrate the gyro's angular rate into yaw, extract yaw from wheel odometry, and fuse the
+          two with a tunable weight &alpha;.</li>
+        <li>Designed a repeatable test (forward, turns in both directions, reverse) that returns the robot to its starting heading,
+          then measured final heading error with a protractor over five trials per &alpha;.</li>
+        <li>&alpha; = 0.75 (mostly gyro, a little odometry) gave the lowest and most consistent error: <strong>2.86&deg; &plusmn; 0.24&deg;</strong>,
+          versus 6.20&deg; when relying mostly on the encoders.</li>
+        <li>Later re-implemented the fusion node in C++, using message filters to time-synchronize the IMU and odometry streams.</li>
       </ul>
-      <p class="todo">TODO: add photos, videos, a longer write-up, and links (code, paper, demo).</p>
+      <figure>
+        <img src="../images/c280/alpha.jpg" alt="Heading error for each alpha" style="max-width:560px">
+        <figcaption>Final heading error after the test sequence for each &alpha; (mean &plusmn; std, 5 trials each).</figcaption>
+      </figure>
+
+      <h2>2. Scan matching with ICP</h2>
+      <ul>
+        <li>Transformed each LiDAR scan into the odometry frame (quaternion &rarr; rotation, then translation), using TF lookups at
+          the scan's own timestamp. Unsynchronized clocks between robot and laptop broke these lookups, so we set up chrony time sync.</li>
+        <li><strong>Point-to-point ICP:</strong> nearest-neighbor matching with a KD-tree, then the best-fit rotation and translation in
+          closed form via SVD (the Kabsch method), with a reflection check.</li>
+        <li><strong>Point-to-plane ICP:</strong> estimated a surface normal at each map point, then solved a linearized least-squares
+          problem that only penalizes error <em>along</em> the normal, so scans can slide along walls. It converges with a mean residual
+          around 2&times;10<sup>&minus;4</sup>.</li>
+      </ul>
+
+      <h2>3. Occupancy-grid mapping</h2>
+      <ul>
+        <li>Traced each LiDAR beam through the grid (Bresenham's line algorithm), marking cells along the beam as more likely free and
+          the cell where it hits as more likely occupied.</li>
+        <li>Stored beliefs as <strong>log-odds</strong>, so each update is just an addition, and clamped them between 10% and 90% so the map
+          can still change its mind.</li>
+        <li>Combined this with ICP on the robot to map the course arena at 1&nbsp;cm resolution and saved it for localization.</li>
+      </ul>
+      <figure>
+        <img src="../images/c280/logodds.jpg" alt="Log-odds occupancy grid built from a simulated LiDAR" style="max-width:420px">
+        <figcaption>My log-odds mapper in simulation: free space (light), walls and obstacles (dark) and unexplored cells (white).</figcaption>
+      </figure>
+
+      <h2>4. Localization with a particle filter</h2>
+      <p>Given the saved map, the robot has to figure out where it is. Monte Carlo localization tracks a cloud of guesses (particles).</p>
+      <ul>
+        <li><strong>Motion update:</strong> moved every particle by the odometry change between readings, computed with SE(2) transforms,
+          plus a little Gaussian noise.</li>
+        <li><strong>Measurement update:</strong> projected LiDAR beams from each particle and scored how close they land to walls using a
+          precomputed distance transform of the map, a fast likelihood-field model.</li>
+        <li><strong>Resampling:</strong> systematic resampling, triggered only when the effective number of particles drops below half,
+          to avoid throwing away diversity too early.</li>
+        <li>Published the resulting map &rarr; odom transform so the rest of ROS knows where the robot is. With the robot placed at a
+          random pose and a rough initial guess given in RViz, the particles converged and tracked it for two full laps of the arena.</li>
+      </ul>
+
+      <h2>Also in the course</h2>
+      <ul>
+        <li><strong>Computer vision:</strong> thresholding (including Otsu's method), Sobel and Canny edge detection, and Gabor filters
+          for texture with OpenCV.</li>
+        <li><strong>Machine learning:</strong> gradient descent by hand, then PyTorch autograd and a small neural network, including
+          testing how it fails to generalize outside its training range.</li>
+        <li><strong>Planning:</strong> A*, weighted A* and heuristic admissibility on 8-connected grids.</li>
+      </ul>
+      <p class="tags">Group work with classmates in 16-280. Code isn't posted publicly, per course policy.</p>
     </main>
   </div>
 
