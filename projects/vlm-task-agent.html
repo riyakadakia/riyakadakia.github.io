@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VLM Task-Planning Agent for Bimanual Assembly - Riya Kadakia</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="masthead">
+    <nav>
+      <a class="site-title" href="../index.html">Riya Kadakia</a>
+      <a href="../index.html">Home</a>
+      <a href="../cv.html">Curriculum Vitae</a>
+      <a href="../projects.html" class="active">Projects</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../classes.html">Classes</a>
+    </nav>
+  </header>
+
+  <div class="page">
+    <aside class="sidebar">
+      <img class="avatar" src="../images/headshot.jpg" alt="Riya Kadakia" onerror="this.src='../images/placeholder.svg'">
+      <h3 class="name">Riya Kadakia</h3>
+      <p class="bio">Robotics &amp; Information Systems student at Carnegie Mellon.</p>
+      <ul>
+        <li>Pittsburgh, PA</li>
+        <li>Carnegie Mellon University</li>
+        <li><a href="mailto:rkadakia@andrew.cmu.edu">Email</a></li>
+        <li><a href="https://github.com/riyakadakia">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/riyakadakia">LinkedIn</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <p><a href="../projects.html">&larr; All projects</a></p>
+      <h1>VLM Task-Planning Agent for Bimanual Assembly</h1>
+      <p class="tags">Robotic Caregiving &amp; Human Interaction Lab, CMU &middot; Research Assistant &middot; Summer 2025
+        &middot; GPT-4o &middot; MuJoCo &middot; Python &middot; Prompt Engineering</p>
+      <figure>
+        <img src="../images/rchi/sim-assembly.jpg" alt="Simulated bimanual block assembly scene" style="max-width:420px">
+        <figcaption>The simulated assembly task: colored blocks must be picked up, reoriented and inserted to match a goal image.</figcaption>
+      </figure>
+
+      <h2>Overview</h2>
+      <p>Vision-language-action systems like Hi Robot split a task into a high-level &ldquo;planner&rdquo; that reasons about what to do
+        next and a low-level policy that does it. As part of exploring VLA task reasoning in the lab, I built the high-level piece for a
+        simulated bimanual assembly puzzle: an agent that looks at the scene and a goal image and decides the next action.</p>
+
+      <h2>How the agent works</h2>
+      <ul>
+        <li>Each step, GPT-4o receives the <strong>goal image</strong>, the <strong>current camera view</strong>, an optional
+          next-state image, and a text description of what's in the gripper and the recent action history.</li>
+        <li>It answers with exactly one action, such as <code>pick up red</code>, <code>reorient red</code>, <code>insert red</code> or
+          <code>put down red</code>, which the simulator then executes.</li>
+        <li>Images are resized to 336&times;336 and interleaved with the prompt text so the model knows which image is which.</li>
+      </ul>
+      <figure>
+        <img src="../images/rchi/agent-current.jpg" alt="Single-view agent architecture">
+        <figcaption>The single-view agent: goal image, back camera view and optional next state go to GPT-4o, which outputs the next action.</figcaption>
+      </figure>
+
+      <h2>Making it reliable</h2>
+      <p>The model reasoned well about the puzzle but tracked state poorly: it would try to pick up a second block while still holding one,
+        or assume an insert had worked when it hadn't. Instead of relying on prompting alone, I added a validation layer around the model:</p>
+      <ul>
+        <li><strong>Explicit rules in the system prompt:</strong> hold one object at a time, try inserting a held block before putting it down,
+          and check the history against the current state.</li>
+        <li><strong>History validation:</strong> if the last action was an insert but the block is still in the gripper, the insert failed. The
+          agent removes it from the history and tells the model to put the block down first.</li>
+        <li><strong>Safe-action override:</strong> if the robot is holding a different block than the one it just tried to insert, the agent
+          returns <code>put down</code> deterministically, without calling the model.</li>
+      </ul>
+
+      <h2>Extending to multiple camera views</h2>
+      <p>Many remaining mistakes came from judging position, depth and occlusion from a single camera. I designed a multi-view version that
+        captures the back, side and close-up cameras and lets the model cross-check them.</p>
+      <ul>
+        <li>I compared two designs: always passing every view into the agent, or giving the agent a tool to request extra views when it's unsure.
+          We started with always-on views because they're simpler and make it easy to measure whether extra views help at all.</li>
+        <li>I planned a metrics pipeline to compare single-view and multi-view runs: task and step success rate, inference time,
+          error categories (position, occlusion, depth, alignment) and how well the model's confidence predicts success.</li>
+      </ul>
+      <figure>
+        <img src="../images/rchi/agent-multiview.jpg" alt="Multi-view agent architecture">
+        <figcaption>Multi-view design: images from three cameras are aggregated and passed to GPT-4o alongside the goal image.</figcaption>
+      </figure>
+      <p class="todo">TODO: add results (e.g. success rate before/after guardrails, single- vs. multi-view) and a code link if public.</p>
+
+      <p>Related: <a href="rac.html">RaC: Recovery &amp; Correction for Robot Learning</a></p>
+    </main>
+  </div>
+
+  <footer>&copy; 2026 Riya Kadakia</footer>
+</body>
+</html>
