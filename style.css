@@ -125,3 +125,7 @@ figcaption { color: var(--muted); font-size: .85rem; margin-top: .4rem; }
 .fig-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
 .fig-row figure { margin: .5rem 0; }
 code { background: #f4f5f6; padding: .05rem .3rem; border-radius: 3px; font-size: .88em; }
+
+/* ===== Embedded CV ===== */
+.cv-viewer { width: 100%; height: 85vh; min-height: 600px; border: 1px solid var(--border); border-radius: 4px; display: block; }
+@media (max-width: 760px) { .cv-viewer { height: 75vh; min-height: 480px; } }
