@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Autonomous Sorting Trash Bot - Riya Kadakia</title>
+  <title>Teleoperated Sorting Robot - Riya Kadakia</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -34,16 +34,96 @@
 
     <main>
       <p><a href="../projects.html">&larr; All projects</a></p>
-      <h1>Autonomous Sorting Trash Bot</h1>
-      <p class="tags">CAD &middot; 3D Printing &middot; CNC &middot; Laser Cutting &middot; Fall 2026</p>
-      <img class="project-hero" src="../images/placeholder.svg" alt="Autonomous Sorting Trash Bot">
-      <h2>Overview</h2>
-      <p>A robot built from scratch that picks up and sorts waste into bins.</p>
-      <h2>What I did</h2>
+      <h1>Teleoperated Sorting Robot</h1>
+      <p class="tags">16-220 Robot Building Practices, CMU &middot; Fall 2026 &middot; Semester project, in progress &middot; CAD &middot; 3D Printing &middot; Laser Cutting &middot; VEX V5</p>
+      <figure>
+        <img src="../images/c220/robot-cad.jpg" alt="CAD model of the robot: drivetrain, tower, 4-bar lift and gripper" style="max-width:640px">
+        <figcaption>Full robot in CAD: drivetrain, a tower carrying a 4-bar parallel lift, and my gear-driven three-finger gripper.</figcaption>
+      </figure>
+
+      <h2>The challenge</h2>
+      <p>Build a robot that picks up three very different objects (a flat sheet of paper, a ~450&nbsp;g beanbag, and an empty
+        1-liter soda bottle) and drops each into its own bin up to 20&nbsp;inches tall. The robot is driven by a person with a
+        controller, so the design goal is to make picking things up as easy and repeatable as possible for the driver.</p>
+
+      <h2>Design</h2>
       <ul>
-        <li>Designed the end-effector and lift mechanism from cardboard prototype through CAD to fabricated parts.</li><li>Picks up and sorts paper, a plastic bottle and a beanbag into separate bins.</li>
+        <li><strong>4-bar parallel lift:</strong> two parallel arms keep the gripper level at every height, so the driver only has
+          to line up the robot's base. That cuts alignment to two directions (forward/back, left/right).</li>
+        <li><strong>Gear-driven claw:</strong> one motor drives a pair of meshed gears, so both sides of the claw open and close together.</li>
+        <li><strong>Three curved fingers per side:</strong> staggered fingers interleave to trap flat paper, and their curved profile cups
+          the beanbag and bottle. One end effector handles all three objects.</li>
+        <li><strong>Alignment plate:</strong> a low plate on the front lets the driver push the beanbag or bottle against it to center the
+          object under the claw. The bottle gets knocked over first and grabbed lying down.</li>
+        <li><strong>Controls:</strong> arcade drive, with buttons for manual lift and claw control plus planned encoder presets for
+          ground, carry and dump heights.</li>
       </ul>
-      <p class="todo">TODO: add photos, videos, a longer write-up, and links (code, paper, demo).</p>
+      <p>I chose this over a single-pivot arm (simpler, but the claw tilts as it rises) and a roller intake, using a weighted decision
+        matrix: 4-bar 19, single pivot 18, rollers 14.</p>
+
+      <h2>Sizing the motors</h2>
+      <ul>
+        <li><strong>Lift:</strong> worst case is the beanbag held out on a horizontal 15&nbsp;in (0.38&nbsp;m) arm:
+          0.45&nbsp;kg &times; 9.81&nbsp;m/s&sup2; &times; 0.38&nbsp;m &asymp; 1.7&nbsp;N&middot;m before the weight of the arm and
+          gripper. A 5:1 gear reduction gives about 10.5&nbsp;N&middot;m, plenty of margin. With a 14&nbsp;in pivot, the arm must
+          rise at least 60&deg; to clear a 20&nbsp;in bin.</li>
+        <li><strong>Gripper:</strong> holding the beanbag by friction needs about 1.44&nbsp;N&middot;m. A 50:15 gear pair (&asymp;3.3:1)
+          keeps the motor well below stall, with hold mode and a current limit to avoid overheating.</li>
+        <li><strong>Stability:</strong> with the arm raised and loaded, the center of mass has to stay inside the wheelbase. A
+          counterweight is the backup plan.</li>
+      </ul>
+
+      <h2>Gripper prototype</h2>
+      <p>I built the end effector first and tested it on its own before mounting it on the lift. The fingers, spacers and connectors are
+        3D printed in PETG, the gears are printed in PLA, and the side and top plates are laser-cut &frac14;&Prime; acrylic.</p>
+      <div class="fig-row">
+        <figure><img src="../images/c220/grip-paper.jpg" alt="Gripper holding a sheet of paper"><figcaption>Flat paper</figcaption></figure>
+        <figure><img src="../images/c220/grip-beanbag.jpg" alt="Gripper holding a beanbag"><figcaption>Beanbag</figcaption></figure>
+        <figure><img src="../images/c220/grip-bottle.jpg" alt="Gripper holding a soda bottle"><figcaption>1&nbsp;L bottle</figcaption></figure>
+      </div>
+      <div class="fig-row">
+        <figure>
+          <video controls muted playsinline preload="metadata" poster="../images/c220/gripper-demo1-poster.jpg" style="width:100%;max-height:460px;background:#000;border-radius:4px">
+            <source src="../images/c220/gripper-demo1.mp4" type="video/mp4"></video>
+          <figcaption>Motor-driven gripper picking up paper and the beanbag.</figcaption>
+        </figure>
+        <figure>
+          <video controls muted playsinline preload="metadata" poster="../images/c220/gripper-demo2-poster.jpg" style="width:100%;max-height:460px;background:#000;border-radius:4px">
+            <source src="../images/c220/gripper-demo2.mp4" type="video/mp4"></video>
+          <figcaption>Grabbing and lifting the bottle lying on its side.</figcaption>
+        </figure>
+      </div>
+
+      <h3>Gripper parts</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+        <tr style="text-align:left;color:var(--muted)"><th>Part</th><th>Qty</th><th>Material</th><th>Made by</th></tr>
+        <tr><td>Gripper fingers (4&Prime; &times; 1.3&Prime;)</td><td>6</td><td>PETG</td><td>3D printing</td></tr>
+        <tr><td>Spur gears (50T, 15T)</td><td>2 + 2</td><td>PLA</td><td>3D printing</td></tr>
+        <tr><td>Spacers and L-connectors</td><td>17</td><td>PETG</td><td>3D printing</td></tr>
+        <tr><td>Side boards (5&Prime; &times; 2.56&Prime;) and top board (6.25&Prime; &times; 5&Prime;)</td><td>2 + 1</td><td>&frac14;&Prime; acrylic</td><td>Laser cutting</td></tr>
+        <tr><td>Axles (&frac14;&Prime; and &frac18;&Prime;)</td><td>3 + 1</td><td></td><td>Machined</td></tr>
+        <tr><td>10-32 screws, shaft collars</td><td>8 + 6</td><td></td><td>Lab stock</td></tr>
+      </table>
+
+      <h2>Skills from the course labs</h2>
+      <ul>
+        <li><strong>Electronics:</strong> soldered the robot's main power switch with XT30 connectors and heat shrink, then verified it
+          with continuity, resistance and voltage tests (12.77&nbsp;V on, ~0&nbsp;V off).</li>
+        <li><strong>Materials:</strong> measured Young's modulus for about a dozen materials with a cantilever-beam test (dial indicator + force gauge),
+          and broke PETG at 15% vs. 100% infill, plywoods, acrylic and polycarbonate to compare how they fail.</li>
+        <li><strong>CAD and fabrication:</strong> modeled a multi-part assembly and produced dimensioned technical drawings for laser-cut
+          and 3D-printed parts.</li>
+      </ul>
+      <figure>
+        <img src="../images/c220/flower-drawing.jpg" alt="Technical drawing of a laser-cut part" style="max-width:640px">
+        <figcaption>One of my technical drawings from the CAD lab: a dimensioned drawing of a laser-cut part.</figcaption>
+      </figure>
+
+      <h2>Next steps</h2>
+      <ul>
+        <li>Mount the gripper on the 4-bar lift and test each object on the full robot.</li>
+        <li>Add the alignment plate, then full three-object runs and driver practice before the final demo in December.</li>
+      </ul>
     </main>
   </div>
 
