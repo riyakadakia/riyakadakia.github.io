@@ -35,15 +35,66 @@
     <main>
       <p><a href="../projects.html">&larr; All projects</a></p>
       <h1>Franka Arm Light Painting</h1>
-      <p class="tags">Franka Panda &middot; Python &middot; Fall 2025</p>
-      <img class="project-hero" src="../images/placeholder.svg" alt="Franka Arm Light Painting">
+      <p class="tags">16-384 Robot Kinematics &amp; Dynamics, CMU &middot; Fall 2025 &middot; Team "End-Effector Elite" with Anvita Agarwal and Vivaan Sawant &middot; Franka Emika Panda &middot; Python</p>
+      <figure>
+        <img src="../images/c384/final-painting.jpg" alt="Long-exposure photo of the robot's light painting" style="max-width:380px">
+        <figcaption>Our final light painting: an ocean wave of three alternating semicircles, each in a different color, with
+          lines fading toward the horizon. The fainter streaks are the arm moving between drawing points.
+          <a href="https://youtube.com/shorts/knxLYr1udwU">Watch the demo</a>.</figcaption>
+      </figure>
+      <figure>
+        <img src="../images/c384/light-plan.jpg" alt="Planned light-painting path: three semicircles forming a wave plus three lines" style="max-width:560px">
+        <figcaption>Our light-painting design, an ocean wave: three semicircles, one per colored light, each followed by a 10&nbsp;cm line.
+          This is the planned path, computed by running our forward and inverse kinematics code in simulation.</figcaption>
+      </figure>
+
       <h2>Overview</h2>
-      <p>From trajectory generation to painting an ocean wave with light.</p>
-      <h2>What I did</h2>
+      <p>The capstone for Robot Kinematics &amp; Dynamics: program a 7-joint Franka Panda arm to pick up lights and "draw" with them in
+        the air while a camera takes a long-exposure photo. We built every layer ourselves over three milestones (forward
+        kinematics, smooth trajectories, then inverse kinematics) and combined them into a full pick, draw and drop sequence with
+        three different lights.</p>
+
+      <h2>1. Forward kinematics</h2>
       <ul>
-        <li>Co-developed a trapezoidal-velocity joint-space trajectory generator verified with forward kinematics.</li><li>Added a standby/recovery mode (continue, retry, safe exit) for repeatable, safe hardware operation.</li><li>Capstone: planned Cartesian arc trajectories to light-paint a three-semicircle wave with color-coded segments.</li>
+        <li>Implemented forward kinematics from the Franka's Denavit&ndash;Hartenberg parameters (Craig/modified convention), chaining
+          one transform per joint to get the gripper's pose.</li>
+        <li>Validated it on the real robot: for four test configurations, including two very different joint configurations that reach
+          the same pose, our computed position matched the robot's own reading to within <strong>0.04&nbsp;mm</strong>.</li>
       </ul>
-      <p class="todo">TODO: add photos, videos, a longer write-up, and links (code, paper, demo).</p>
+
+      <h2>2. Smooth trajectories</h2>
+      <ul>
+        <li>Wrote a joint-space trajectory generator with a <strong>trapezoidal velocity profile</strong>: accelerate for 0.5&nbsp;s, cruise,
+          decelerate for 0.5&nbsp;s, sampled every 0.02&nbsp;s to match the robot's control rate. Velocity is normalized so the motion
+          ends exactly at the goal.</li>
+        <li>Demonstrated a four-waypoint loop and a flashlight pick-and-place on the robot. Early on the arm overshot its goal until we
+          reduced the peak velocity.</li>
+        <li>Built a <strong>standby/recovery mode</strong> between every step (continue, retry the move, or safely quit), which made hardware
+          debugging much faster, e.g. recovering when the gripper hadn't initialized.</li>
+        <li>Computed the Jacobian both analytically (from each joint's axis and position) and by finite differences, and checked that
+          they agree.</li>
+      </ul>
+      <figure>
+        <img src="../images/c384/trapezoid.jpg" alt="Trapezoidal velocity profile" style="max-width:620px">
+        <figcaption>Our trapezoidal profile: progress along the path (left) and its velocity (right). Shaded regions are the
+          acceleration and deceleration phases.</figcaption>
+      </figure>
+
+      <h2>3. Inverse kinematics and drawing</h2>
+      <ul>
+        <li>Implemented numerical inverse kinematics: compare the current pose to the target (position error plus an axis&ndash;angle
+          rotation error), then update the joints using a <strong>damped least-squares</strong> step on the Jacobian until the error is
+          below 0.1&nbsp;mm.</li>
+        <li><strong>Straight lines:</strong> interpolate the gripper's position from start to goal with orientation held fixed, and solve IK
+          at each waypoint, warm-starting from the previous solution so the arm moves smoothly.</li>
+        <li><strong>Curves:</strong> a general function that follows any path given as a function of progress, used to draw the 3.2&nbsp;cm-radius
+          semicircles in the vertical plane facing the camera.</li>
+      </ul>
+
+      <h2>4. The full sequence</h2>
+      <p>For each of the three lights: move above the holder, lower and grip, lift, travel to the drawing start, draw a semicircle,
+        move to the line start, draw a line, then drop the light in a bin and fetch the next. Every step waits for an operator's
+        go-ahead, with the option to retry.</p>
     </main>
   </div>
 
