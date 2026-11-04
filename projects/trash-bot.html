@@ -37,8 +37,8 @@
       <h1>Teleoperated Sorting Robot</h1>
       <p class="tags">16-220 Robot Building Practices, CMU &middot; Fall 2026 &middot; Semester project, in progress &middot; CAD &middot; 3D Printing &middot; Laser Cutting &middot; VEX V5</p>
       <figure>
-        <img src="../images/c220/robot-cad.jpg" alt="CAD model of the robot: drivetrain, tower, 4-bar lift and gripper" style="max-width:640px">
-        <figcaption>Full robot in CAD: drivetrain, a tower carrying a 4-bar parallel lift, and my gear-driven three-finger gripper.</figcaption>
+        <img src="../images/c220/robot-cad.jpg" alt="CAD model of the robot: drivetrain, tower, simple arm lift and gripper" style="max-width:640px">
+        <figcaption>Full robot in CAD: drivetrain, a tower carrying a simple arm lift, and my gear-driven three-finger gripper.</figcaption>
       </figure>
 
       <h2>The challenge</h2>
@@ -48,8 +48,9 @@
 
       <h2>Design</h2>
       <ul>
-        <li><strong>4-bar parallel lift:</strong> two parallel arms keep the gripper level at every height, so the driver only has
-          to line up the robot's base. That cuts alignment to two directions (forward/back, left/right).</li>
+        <li><strong>Simple arm lift:</strong> two bars on a single pivot, driven through a 3:1 gear reduction. A free wrist joint lets
+          the gripper hang level at every height, so the driver only has to line up the robot's base. That cuts alignment to two
+          directions (forward/back, left/right).</li>
         <li><strong>Gear-driven claw:</strong> one motor drives a pair of meshed gears, so both sides of the claw open and close together.</li>
         <li><strong>Three curved fingers per side:</strong> staggered fingers interleave to trap flat paper, and their curved profile cups
           the beanbag and bottle. One end effector handles all three objects.</li>
@@ -58,15 +59,17 @@
         <li><strong>Controls:</strong> arcade drive, with buttons for manual lift and claw control plus planned encoder presets for
           ground, carry and dump heights.</li>
       </ul>
-      <p>I chose this over a single-pivot arm (simpler, but the claw tilts as it rises) and a roller intake, using a weighted decision
-        matrix: 4-bar 19, single pivot 18, rollers 14.</p>
+      <p>My proposal originally planned a 4-bar parallel linkage to keep the claw level. It narrowly beat a plain single-pivot arm in
+        my weighted decision matrix (19 vs. 18, with a roller intake at 14). In the build I switched to the simple arm with a free
+        wrist: it keeps the gripper level like the 4-bar, but with half the bars, half the arm mass and fewer parts.</p>
 
       <h2>Sizing the motors</h2>
       <ul>
         <li><strong>Lift:</strong> worst case is the beanbag held out on a horizontal 15&nbsp;in (0.38&nbsp;m) arm:
           0.45&nbsp;kg &times; 9.81&nbsp;m/s&sup2; &times; 0.38&nbsp;m &asymp; 1.7&nbsp;N&middot;m before the weight of the arm and
-          gripper. A 5:1 gear reduction gives about 10.5&nbsp;N&middot;m, plenty of margin. With a 14&nbsp;in pivot, the arm must
-          rise at least 60&deg; to clear a 20&nbsp;in bin.</li>
+          gripper. Using two bars instead of four halves the arm's mass, so a 3:1 gear reduction is enough: about
+          6.3&nbsp;N&middot;m at stall, more than 3&times; the beanbag's load. With a 14&nbsp;in pivot, the arm must rise at least
+          60&deg; to clear a 20&nbsp;in bin.</li>
         <li><strong>Gripper:</strong> holding the beanbag by friction needs about 1.44&nbsp;N&middot;m. A 50:15 gear pair (&asymp;3.3:1)
           keeps the motor well below stall, with hold mode and a current limit to avoid overheating.</li>
         <li><strong>Stability:</strong> with the arm raised and loaded, the center of mass has to stay inside the wheelbase. A
@@ -74,7 +77,7 @@
       </ul>
 
       <h2>Gripper prototype</h2>
-      <p>I built the end effector first and tested it on its own before mounting it on the lift. The fingers, spacers and connectors are
+      <p>I built the end effector first and tested it on its own before mounting it on the arm. The fingers, spacers and connectors are
         3D printed in PETG, the gears are printed in PLA, and the side and top plates are laser-cut &frac14;&Prime; acrylic.</p>
       <div class="fig-row">
         <figure><img src="../images/c220/grip-paper.jpg" alt="Gripper holding a sheet of paper"><figcaption>Flat paper</figcaption></figure>
@@ -121,7 +124,7 @@
 
       <h2>Next steps</h2>
       <ul>
-        <li>Mount the gripper on the 4-bar lift and test each object on the full robot.</li>
+        <li>Mount the gripper on the simple arm lift and test each object on the full robot.</li>
         <li>Add the alignment plate, then full three-object runs and driver practice before the final demo in December.</li>
       </ul>
     </main>

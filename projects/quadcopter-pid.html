@@ -35,15 +35,72 @@
     <main>
       <p><a href="../projects.html">&larr; All projects</a></p>
       <h1>Adaptive Gain-Scheduled PID Quadcopter</h1>
-      <p class="tags">MATLAB &middot; Simulink &middot; Spring 2026</p>
-      <img class="project-hero" src="../images/placeholder.svg" alt="Adaptive Gain-Scheduled PID Quadcopter">
+      <p class="tags">16-299 Feedback Control Systems, CMU &middot; Spring 2026 &middot; Team project with Cindy Wang and Nidhi Vadlamudi &middot; MATLAB &middot; Simulink</p>
+      <div class="fig-row">
+        <figure><img src="../images/c299/fixed-10x.jpg" alt="Fixed-gain PID altitude response to a 10x payload increase">
+          <figcaption>Fixed-gain PID: when the payload jumps 10&times; at t&nbsp;=&nbsp;5&nbsp;s, altitude spikes to ~2.15&nbsp;m (1&nbsp;m setpoint).</figcaption></figure>
+        <figure><img src="../images/c299/sched-10x.jpg" alt="Gain-scheduled PID altitude response to a 10x payload increase">
+          <figcaption>Gain-scheduled PID: the same payload jump peaks at only ~1.3&nbsp;m, then slowly returns toward the setpoint.</figcaption></figure>
+      </div>
+
       <h2>Overview</h2>
-      <p>Keeping a delivery drone stable across a 10&times; payload change.</p>
-      <h2>What I did</h2>
+      <p>A delivery drone's mass changes every time it picks up or drops off a package, but a standard PID controller is tuned for
+        one fixed mass. We replicated a published quadcopter model and PID controller (Sahrir &amp; Basri, <em>Modelling and Manual
+        Tuning PID Control of Quadcopter</em>), showed where it breaks down under payload changes, and extended it with gain scheduling
+        so the controller adapts to the current payload.</p>
+
+      <h2>How we built it</h2>
+      <p>We added one layer at a time and validated each before moving on.</p>
+      <ol>
+        <li><strong>Model:</strong> implemented the paper's Newton&ndash;Euler equations of motion in Simulink, taking total thrust and
+          three torques as inputs and integrating to all 12 states (position, orientation and their rates).</li>
+        <li><strong>Open-loop check:</strong> with thrust exactly equal to weight (m&middot;g) the drone hovers, and &plusmn;1&nbsp;N makes it
+          diverge up or down, confirming the dynamics before adding control.</li>
+        <li><strong>Baseline control:</strong> four PID loops (altitude, roll, pitch, yaw) using the paper's tuned gains. A 1&nbsp;m altitude
+          step gives fast rise, small well-damped overshoot and zero steady-state error.</li>
+        <li><strong>Payload variation:</strong> stepped the mass from 0.5&nbsp;kg to 0.8&nbsp;kg (1.6&times;) and to 5&nbsp;kg (10&times;) mid-flight.</li>
+        <li><strong>Gain scheduling</strong> and <strong>full operation</strong> (pickup and drop-off), described below.</li>
+      </ol>
+      <div class="fig-row">
+        <figure><img src="../images/c299/simulink-base.jpg" alt="Baseline Simulink model"><figcaption>Baseline Simulink model: dynamics block with four PID loops.</figcaption></figure>
+        <figure><img src="../images/c299/baseline.jpg" alt="Baseline altitude step response"><figcaption>Baseline at 0.5&nbsp;kg: 1&nbsp;m altitude step.</figcaption></figure>
+      </div>
+
+      <h2>Where fixed gains fail</h2>
+      <p>The baseline handles the small 1.6&times; payload change well, but a 10&times; jump breaks it: altitude spikes to about 2.15&nbsp;m against a 1&nbsp;m setpoint
+        (~115% overshoot) and recovers slowly. Our analysis pointed to <strong>integrator windup</strong> driving the thrust too high.</p>
+
+      <h2>Gain scheduling</h2>
+      <p>A delivery drone knows roughly what it's carrying, so the controller can switch gains <em>before</em> the error builds up.
+        We replaced the fixed PID gains with lookup tables indexed by current mass, interpolating between breakpoints, and added
+        integrator limits as anti-windup.</p>
+      <table style="width:100%;max-width:520px;border-collapse:collapse;font-size:.9rem">
+        <tr style="text-align:left;color:var(--muted)"><th>Mass (kg)</th><th>K<sub>p</sub> altitude</th><th>K<sub>d</sub> altitude</th><th>K<sub>i</sub> altitude</th></tr>
+        <tr><td>0.5</td><td>35</td><td>6</td><td>3</td></tr>
+        <tr><td>0.8</td><td>50</td><td>9</td><td>5</td></tr>
+        <tr><td>1.5</td><td>70</td><td>13</td><td>7</td></tr>
+        <tr><td>3.0</td><td>100</td><td>18</td><td>10</td></tr>
+        <tr><td>5.0</td><td>150</td><td>25</td><td>14</td></tr>
+      </table>
+      <p>Attitude gains (roll, pitch, yaw) were scheduled the same way. With scheduling, the 10&times; payload jump peaks at ~1.3&nbsp;m instead of
+        ~2.15&nbsp;m (about 28% vs. 115% overshoot). The trade-off is a longer settling time, but a much smaller disturbance.</p>
+      <figure><img src="../images/c299/simulink-sched.jpg" alt="Gain-scheduled Simulink model with lookup tables" style="max-width:560px">
+        <figcaption>Gain-scheduled model: the current mass feeds lookup tables that set each PID block's gains.</figcaption></figure>
+
+      <h2>Full delivery cycle</h2>
+      <p>Finally we simulated a complete delivery: picking up a package (0.5&nbsp;&rarr;&nbsp;3&nbsp;kg) and dropping it off later
+        (back to 0.5&nbsp;kg). The controller held altitude through the pickup. The drop-off caused a larger dip (to about 0.45&nbsp;m) with a slow
+        recovery, which is the main target for future tuning.</p>
+      <figure><img src="../images/c299/full-op.jpg" alt="Altitude through pickup and drop-off" style="max-width:560px">
+        <figcaption>Altitude through a pickup (~t&nbsp;=&nbsp;5&nbsp;s) and drop-off (t&nbsp;=&nbsp;20&nbsp;s).</figcaption></figure>
+
+      <h2>Next steps</h2>
       <ul>
-        <li>Replicated a published quadcopter model with four PID loops (altitude, roll, pitch, yaw) and validated open-loop hover dynamics.</li><li>Showed fixed-gain PID failing under a 10&times; payload jump from integrator windup (~115% overshoot).</li><li>Designed mass-indexed gain scheduling that cut overshoot to ~28% across 0.5&ndash;5 kg.</li>
+        <li>Tune gains specifically for payload drop-off, and handle several pickups and drop-offs in a row.</li>
+        <li>Model mass changes more realistically (not instantaneous), and add feedforward gravity compensation, air disturbances and
+          off-center package drops.</li>
+        <li>Try it on a real drone.</li>
       </ul>
-      <p class="todo">TODO: add photos, videos, a longer write-up, and links (code, paper, demo).</p>
     </main>
   </div>
 
