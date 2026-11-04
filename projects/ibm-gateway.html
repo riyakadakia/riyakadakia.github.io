@@ -35,15 +35,32 @@
     <main>
       <p><a href="../projects.html">&larr; All projects</a></p>
       <h1>Model Gateway &amp; Document Understanding Demo</h1>
-      <p class="tags">IBM Software Developer Intern &middot; May 2026 &ndash; Aug 2026</p>
-      <img class="project-hero" src="../images/placeholder.svg" alt="Model Gateway &amp; Document Understanding Demo">
+      <p class="tags">IBM &middot; Software Developer Intern &middot; May &ndash; Aug 2026 &middot; OpenShift &middot; LLM serving &middot; Web development</p>
+
       <h2>Overview</h2>
-      <p>Routing LLMs through one endpoint at IBM.</p>
-      <h2>What I did</h2>
+      <p>During my summer at IBM I worked on two projects: infrastructure that makes it easier for teams to use many AI models through
+        one interface, and a feature for a document-understanding demo. Because this was internal work, I describe it at a high level here.</p>
+
+      <h2>Model gateway</h2>
+      <p>Teams wanted to experiment with many large language models, but each model had its own endpoint and setup. I built a lightweight
+        gateway on an OpenShift cluster that routes requests to 10 different models through a single endpoint, so switching models is a
+        one-line change instead of new integration work.</p>
       <ul>
-        <li>Built a lightweight gateway routing between 10 models on a Spark/OpenShift cluster through a single endpoint, cutting model onboarding time by 80%.</li><li>Developed a KVP extraction subpage for the Watson Document Understanding demo, with 8 built-in schemas and custom schema support.</li>
+        <li>Routes between 10 hosted models behind one consistent interface.</li>
+        <li>Cut the time to onboard a new model by about 80%.</li>
       </ul>
-      <p class="todo">TODO: add photos, videos, a longer write-up, and links (code, paper, demo).</p>
+
+      <h2>Key-value extraction for the Watson Document Understanding demo</h2>
+      <p>I developed a key-value pair (KVP) extraction page for the Watson Document Understanding demo, which pulls structured fields
+        (like names, dates and totals) out of documents.</p>
+      <ul>
+        <li>Ships with 8 built-in schemas for common document types.</li>
+        <li>Lets users define custom schemas for the fields they care about.</li>
+      </ul>
+
+      <h2>What I took away</h2>
+      <p>Building tools other engineers depend on: designing a simple interface that hides complexity, and making features that are
+        easy to demo to people outside the team.</p>
     </main>
   </div>
 
