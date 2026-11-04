@@ -35,15 +35,51 @@
     <main>
       <p><a href="../projects.html">&larr; All projects</a></p>
       <h1>LiDAR&ndash;Camera Calibration for a Driverless Race Car</h1>
-      <p class="tags">Carnegie Mellon Racing (Driverless) &middot; Aug 2025 &ndash; May 2026</p>
-      <img class="project-hero" src="../images/placeholder.svg" alt="LiDAR&ndash;Camera Calibration for a Driverless Race Car">
-      <h2>Overview</h2>
-      <p>Automated extrinsic calibration for Carnegie Mellon Racing.</p>
-      <h2>What I did</h2>
+      <p class="tags">Carnegie Mellon Racing (Driverless) &middot; Project Lead, Point-to-Pixel Calibration &middot; Oct &ndash; Dec 2025 (design review) &middot; ROS&nbsp;2 &middot; Docker &middot; OpenCV &middot; Python</p>
+      <div class="fig-row">
+        <figure><img src="../images/cmr/ransac.jpg" alt="RANSAC plane fit on the calibration board in the LiDAR point cloud">
+          <figcaption>LiDAR side: RANSAC finds the calibration board's plane in the point cloud (green) and its center (yellow).</figcaption></figure>
+        <figure><img src="../images/cmr/apriltag.jpg" alt="AprilTag board detected in a camera image">
+          <figcaption>Camera side: the 3&times;3 AprilTag board is detected and its middle tag (red) gives the board center in pixels.</figcaption></figure>
+      </div>
+
+      <h2>The problem</h2>
+      <p>CMR's driverless car finds cones with a LiDAR and recognizes them in camera images with YOLO. To match the two, every LiDAR
+        point must be mapped to the right camera pixel. That mapping ("point-to-pixel") has to be recalibrated whenever a sensor
+        moves. The team's previous method was hand-matching LiDAR points to image pixels: slow and error-prone. Better calibration means
+        better cone matching, and so better driving.</p>
+
+      <h2>What I built</h2>
+      <p>As project lead, I designed and built an automated pipeline that takes rosbags of a calibration board placed at different spots in
+        front of the car and outputs a projection matrix for each of the two cameras.</p>
+      <ol>
+        <li><strong>LiDAR board center:</strong> a ROS&nbsp;2 node converts each rosbag's ground-filtered point cloud to NumPy and crops to the
+          region where the board should be. RANSAC then fits a plane (constrained to be roughly vertical, like the board) and takes the
+          board center as the inliers' centroid projected onto that plane.</li>
+        <li><strong>Camera board center:</strong> detect every AprilTag on the board in the left and right camera images, take the median of the
+          tag centers, and use the tag closest to it (the middle tag) as the board center in pixels.</li>
+        <li><strong>Solve the mapping:</strong> pair each LiDAR center with its pixel center and solve for each camera's 3&times;4 projection matrix
+          with the Direct Linear Transform (DLT), wrapped in RANSAC (1,000 iterations, 3-pixel threshold) to reject bad pairs.</li>
+        <li><strong>One command:</strong> <code>run_pipeline.py</code> orchestrates everything (starts the nodes in Docker, plays each bag, collects
+          results, runs both calibrations) and saves validation images that overlay projected LiDAR centers on the camera frames.</li>
+      </ol>
+      <figure><img src="../images/cmr/flow.jpg" alt="Pipeline execution flow" style="max-width:640px">
+        <figcaption>Execution flow from data collection to the final projection matrices.</figcaption></figure>
+
+      <h2>Results and design review</h2>
+      <p>Using board positions at 8, 10, 20 and 30&nbsp;ft from the car, the first end-to-end run produced projection matrices for both cameras
+        (12 left-camera and 11 right-camera correspondences, 7 RANSAC inliers each). I presented the module at a design review in
+        December 2025.</p>
+      <p>Reviewer feedback shaped the next steps:</p>
       <ul>
-        <li>Architected a ROS 2 and OpenCV perception stack for real-time LiDAR&ndash;camera fusion, cutting manual calibration effort by 90%.</li><li>Built an automated extrinsic-calibration pipeline pairing 3D LiDAR points with 2D camera detections.</li><li>Wrote ROS 2 nodes that detect AprilTags, localize the board center and convert point clouds to NumPy.</li><li>Implemented a RANSAC-based transform solver and validation suite robust to outliers.</li>
+        <li><strong>Geometry:</strong> board centers all sit at about the same height, so the points are close to coplanar, which DLT handles
+          poorly. Next: vary board height and use every tag (not just the center), or use the cameras' known intrinsics and solve only for
+          the LiDAR-to-camera pose.</li>
+        <li><strong>Validation:</strong> test on held-out board positions, report a pass/fail error threshold justified by a cone's pixel width
+          at range, and check repeatability across runs and lighting.</li>
+        <li><strong>Engineering:</strong> move magic numbers into a config file, add logging and debug levels, and bias data collection toward
+          where cones appear in each camera's view.</li>
       </ul>
-      <p class="todo">TODO: add photos, videos, a longer write-up, and links (code, paper, demo).</p>
     </main>
   </div>
 
