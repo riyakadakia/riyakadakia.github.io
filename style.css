@@ -104,6 +104,9 @@ img { max-width: 100%; }
 .cv-entry .head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
 .cv-entry .head span { color: var(--muted); font-size: .9rem; }
 .cv-entry ul { margin: .3rem 0 0; padding-left: 1.2rem; }
+/* ===== Embedded CV ===== */
+.cv-viewer { width: 100%; height: 85vh; min-height: 600px; border: 1px solid var(--border); border-radius: 4px; display: block; }
+@media (max-width: 760px) { .cv-viewer { height: 75vh; min-height: 480px; } }
 
 /* ===== Placeholder hint ===== */
 .todo { color: #b07d00; font-style: italic; }
